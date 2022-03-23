@@ -1,5 +1,8 @@
 Welcome to Switch!
 
+Switch is a program to streamline switching between DHCP and static addressing on windows servers
+and also allows network tests to be conducted from any windows device
+
 --How to use Switch--
 launch program follow prompts, just that easy
 
