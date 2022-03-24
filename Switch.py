@@ -68,7 +68,7 @@ def Profile():
     Profiles = []
 
     # Choose save or load profile
-    SaveOrLoad = input("Would you like to save or load your configuration S/L: ")
+    SaveOrLoad = str(input("Would you like to save or load your configuration S/L: "))
 
     if "L" or "l" in str(SaveOrLoad):
         
