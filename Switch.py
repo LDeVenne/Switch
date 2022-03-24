@@ -70,7 +70,7 @@ def Profile():
     # Choose save or load profile
     SaveOrLoad = input("Would you like to save or load your configuration S/L: ")
 
-    if SaveOrLoad == "L" or "l":
+    if "L" or "l" in str(SaveOrLoad):
         
         # select file to load from
         ProfileSelect = input("Please specify name of the file containing the profile: ")
@@ -78,7 +78,7 @@ def Profile():
         # Attempt profile load
         try:
             Profile = open(ProfileSelect+".txt","r")
-            print("The file ",Profile," contains the following Profiles;")
+            print("The file ",ProfileSelect," contains the following Profiles;")
             for i in Profile:
                 print(i)
                 Profiles.append(i)
@@ -86,7 +86,7 @@ def Profile():
             print("This file does not exist Please try again")
             Profile()
     
-    elif SaveOrLoad == "S" or "s":
+    elif "S" or "s" in str(SaveOrLoad):
         
         # Save location of new profile
         SaveLocation = input("Please specify file to save to: ")
