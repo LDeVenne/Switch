@@ -69,6 +69,7 @@ def Profile():
 
     # Choose save or load profile
     SaveOrLoad = str(input("Would you like to save or load your configuration S/L: "))
+    print("default value is 'S'")
 
     if "L" or "l" in str(SaveOrLoad):
         
@@ -86,7 +87,7 @@ def Profile():
             print("This file does not exist Please try again")
             Profile()
     
-    elif "S" or "s" in str(SaveOrLoad):
+    else:
         
         # Save location of new profile
         SaveLocation = input("Please specify file to save to: ")
@@ -111,7 +112,7 @@ def Profile():
             # file.write(append)
             
         except:
-            print("ERROR")
+            print("ERROR: please try again!")
             ip = None
             subnetmask = None
             gateway = None
