@@ -8,18 +8,18 @@ def menu():
     2) Set DHCP Address
     3) Configuration Profiles menu
     4) Test Network Connectivity""")
-    select = input("Choose an option: ")
+    select = int(input("Choose an option: "))
 
-    if select == "1":
+    if select == 1:
         select = None
         Static()
-    elif select == "2":
+    elif select == 2:
         select = None
         DHCP()
-    elif select =="3":
+    elif select == 3:
         select = None
         Profile()
-    elif select == '4':
+    elif select == 4:
         select = None
         NetTest()
     else:
@@ -43,6 +43,7 @@ def Static():
     interface.SetGateways(DefaultIPGateway=[gateway])
     interface.SetDNSServerSearchOrder([DNSServer])
 
+    # Display of specified IP information
     print('\n',"-----NEW INTERFACE CONFIGURATION-----",'\n',"IP ADDRESS = ",ip,'\n',"SUBNETMASK = ",subnetmask,'\n',"DEFAULT GATEWAY = ",gateway,'\n',"DNS SERVER = ",DNSServer)
     confirm()
 
@@ -68,10 +69,13 @@ def Profile():
     Profiles = []
 
     # Choose save or load profile
-    SaveOrLoad = str(input("Would you like to save or load your configuration S/L: "))
-    print("default value is 'S'")
-
-    if "L" or "l" in str(SaveOrLoad):
+    SaveOrLoad = int(input("""Would you like to save or load your configuration
+    1) Save
+    2) Load
+    Choose an option: """))
+    
+    # Process User Input
+    if SaveOrLoad == 2:
         
         # select file to load from
         ProfileSelect = input("Please specify name of the file containing the profile: ")
@@ -79,45 +83,51 @@ def Profile():
         # Attempt profile load
         try:
             Profile = open(ProfileSelect+".txt","r")
-            print("The file ",ProfileSelect," contains the following Profiles;")
-            for i in Profile:
+            print('\n',"The file ",ProfileSelect," contains the following Profiles;")
+
+            # Add items to list for profile display
+            for i in Profiles:
                 print(i)
                 Profiles.append(i)
         except:
             print("This file does not exist Please try again")
-            Profile()
+            try:
+                Profile()
+            except:
+                menu()
     
-    else:
+    elif SaveOrLoad == 1:
         
         # Save location of new profile
+        # print("""Profile saving syntax: IP SUBNETMASK DEFAULTGATEWAY DNSSERVER
+        # Not following this syntax will result in misconfigured network settings!!! '\n'""")
         SaveLocation = input("Please specify file to save to: ")
-        print("""Profile saving syntax: IP SUBNETMASK DEFAULTGATEWAY DNSSERVER
-        Not following this syntax will result in misconfigured network settings!!!""")
-        
+      
         try:
-            # Gather items for appending to list
             ip = input(u"Please Insert Desired IP address: ")
             subnetmask = input(u"Please Insert Desired Subnet Mask: ") 
             gateway = input(u"Please Insert Desired Gateway: ")
             DNSServer = input(u'Please Input Desired DNS Server: ')
 
             # prep items for appending
-            appending = []
-            appending.append(ip,subnetmask,gateway,DNSServer)
+            appending = [ip,subnetmask,gateway,DNSServer]
 
             ProcessedProfile = " ".join(appending)
             print(ProcessedProfile)
 
-            # file = open(SaveLocation+".txt","a")
-            # file.write(append)
+            file = open(SaveLocation+".txt","a")
+            file.write(ProcessedProfile)
             
         except:
+            # Error checking invalid or incomplete inputs from user
             print("ERROR: please try again!")
             ip = None
             subnetmask = None
             gateway = None
             DNSServer = None
-            Profile()
+            menu()
+          
+
     menu()
 
 
@@ -147,21 +157,26 @@ def NetTest():
    
 
 def confirm():
-    Userin = input("Are these settings correct?: Y/N: ")
-    if Userin == "Y" or "y":
-        print("Settings confirmed!")
-        menu()
 
-    elif Userin == "N" or "n":
-        ip = None
-        subnetmask = None
-        gateway = None
-        DNSServer = None
-        print("Resetting values. Please Try again")
-        Static()
-    else:
-        print("Invalid entry")
-        confirm()
+    Userin = int(input("""Are these settings correct?
+    1) Yes
+    2) No
+    Choose an option: """))
+    try:
+        if Userin == 1:
+            print("Settings confirmed!")
+            menu()
+
+        elif Userin == 2:
+            ip = None
+            subnetmask = None
+            gateway = None
+            DNSServer = None
+            print("Resetting values. Please Try again")
+            Static()
+    except:
+        print("Invalid Entry... Please Try Again!")
+        
 
 def main():
     menu()
