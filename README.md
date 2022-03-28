@@ -18,10 +18,17 @@ program will prompt for the name of the text file, do not include the file exten
 wait for script to complete
 
 --Prereqs--
-wmi
-https://github.com/tjguk/wmi
 
 python3
 https://www.python.org/
 
-Windows Server OS
+wmi
+https://github.com/tjguk/wmi
+
+-OR-
+
+pip install wmi
+
+Windows OS*
+
+*Windows Server is needed for full functionality
