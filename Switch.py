@@ -12,7 +12,7 @@ def menu():
 
     if select == 1:
         select = None
-        Static()
+        StaticInput()
     elif select == 2:
         select = None
         DHCP()
@@ -27,16 +27,19 @@ def menu():
         print("Invalid Entry")
         menu()
 
-
-def Static():
-    Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
-    interface = Nics[0]
+def StaticInput():
 
     # Take Static info from user
     ip = input(u"Please Insert Desired IP address: ")
     subnetmask = input(u"Please Insert Desired Subnet Mask: ") 
     gateway = input(u"Please Insert Desired Gateway: ")
     DNSServer = input(u'Please Input Desired DNS Server: ')
+    Static(ip,subnetmask,gateway,DNSServer)
+
+
+def Static(ip,subnetmask,gateway,DNSServer):
+    Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
+    interface = Nics[0]
 
     # Put static info into place
     interface.EnableStatic(IPAddress=[ip], SubnetMask=[subnetmask])
@@ -76,28 +79,40 @@ def Profile():
     
     # Process User Input
     if SaveOrLoad == 2:
-        
+        # This section is for loading a configuration
         # select file to load from
+        # Do not include file extensions
         ProfileSelect = input("Please specify name of the file containing the profile: ")
 
         # Attempt profile load
         try:
             Profile = open(ProfileSelect+".txt","r")
-            print('\n',"The file ",ProfileSelect," contains the following Profiles;")
+            print('\n',"The file ",ProfileSelect," contains the following Profile;")
 
             # Add items to list for profile display
-            for i in Profiles:
+            # PROFILES ARE NOT DISPLAYING PROPERLY
+            for i in Profile:
                 print(i)
                 Profiles.append(i)
+            Profile.close()
+            Profiles = [i for item in Profiles for i in item.split()]
+            print(Profiles)
+
+            ip = Profiles[0]
+            subnetmask = Profiles[1]
+            gateway = Profiles[2]
+            DNSServer = Profiles[3]
+
+            Static(ip,subnetmask,gateway,DNSServer)
+
+
         except:
             print("This file does not exist Please try again")
-            try:
-                Profile()
-            except:
-                menu()
+            menu()
+
     
     elif SaveOrLoad == 1:
-        
+        #  This Section is for saving a configuration
         # Save location of new profile
         # print("""Profile saving syntax: IP SUBNETMASK DEFAULTGATEWAY DNSSERVER
         # Not following this syntax will result in misconfigured network settings!!! '\n'""")
@@ -113,11 +128,12 @@ def Profile():
             appending = [ip,subnetmask,gateway,DNSServer]
 
             ProcessedProfile = " ".join(appending)
-            print(ProcessedProfile)
+            # print(ProcessedProfile)
 
             file = open(SaveLocation+".txt","a")
             file.write(ProcessedProfile)
-            
+            file.close()
+
         except:
             # Error checking invalid or incomplete inputs from user
             print("ERROR: please try again!")
@@ -180,5 +196,6 @@ def confirm():
 
 def main():
     menu()
+
 
 main()
