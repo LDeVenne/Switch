@@ -6,7 +6,25 @@ and also allows network tests to be conducted from any windows device
 --How to use Switch--
 launch program follow prompts, just that easy
 
---Static IP addresses
+--Static IP addresses--
+Select The set static IP option and enter information as Prompted
+
+--DHCP Addressing--
+Select DHCP
+
+--Profiles--
+--Saving--
+Select Profiles
+choose save profile
+enter file to save to
+enter information as prompted
+--Loading--
+Select Profiles
+Select Load
+Choose file to load from
+confirm settings
+
+
 ---Network Testing--
 Create a text file with a list of IP Addresses with one address per line;
 x.x.x.x

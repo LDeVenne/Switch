@@ -36,8 +36,31 @@ def StaticInput():
     DNSServer = input(u'Please Input Desired DNS Server: ')
     Static(ip,subnetmask,gateway,DNSServer)
 
+def NewIntConfig(ip,subnetmask,gateway,DNSServer):
+    # Display of specified IP information
+    print('\n',"-----NEW INTERFACE CONFIGURATION-----",'\n',"IP ADDRESS = ",ip,'\n',"SUBNETMASK = ",subnetmask,'\n',"DEFAULT GATEWAY = ",gateway,'\n',"DNS SERVER = ",DNSServer)
+    Userin = int(input("""Are these settings correct?
+    1) Yes
+    2) No
+    Choose an option: """))
+    try:
+        if Userin == 1:
+            print("Settings confirmed!")
+            menu()
+
+        elif Userin == 2:
+            ip = None
+            subnetmask = None
+            gateway = None
+            DNSServer = None
+            print("Resetting values. Please Try again")
+            StaticInput()
+    except:
+        print("Invalid Entry... Please Try Again!")
+
 
 def Static(ip,subnetmask,gateway,DNSServer):
+    NewIntConfig(ip,subnetmask,gateway,DNSServer)
     Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
     interface = Nics[0]
 
@@ -46,9 +69,8 @@ def Static(ip,subnetmask,gateway,DNSServer):
     interface.SetGateways(DefaultIPGateway=[gateway])
     interface.SetDNSServerSearchOrder([DNSServer])
 
-    # Display of specified IP information
-    print('\n',"-----NEW INTERFACE CONFIGURATION-----",'\n',"IP ADDRESS = ",ip,'\n',"SUBNETMASK = ",subnetmask,'\n',"DEFAULT GATEWAY = ",gateway,'\n',"DNS SERVER = ",DNSServer)
-    confirm()
+    
+    
 
 
 def DHCP():
@@ -90,18 +112,17 @@ def Profile():
             print('\n',"The file ",ProfileSelect," contains the following Profile;")
 
             # Add items to list for profile display
-            # PROFILES ARE NOT DISPLAYING PROPERLY
             for i in Profile:
                 print(i)
                 Profiles.append(i)
             Profile.close()
             Profiles = [i for item in Profiles for i in item.split()]
-            print(Profiles)
+            # print(Profiles)
 
-            ip = Profiles[0]
-            subnetmask = Profiles[1]
-            gateway = Profiles[2]
-            DNSServer = Profiles[3]
+            ip = Profiles[1]
+            subnetmask = Profiles[2]
+            gateway = Profiles[3]
+            DNSServer = Profiles[4]
 
             Static(ip,subnetmask,gateway,DNSServer)
 
@@ -119,13 +140,14 @@ def Profile():
         SaveLocation = input("Please specify file to save to: ")
       
         try:
+            ProfileName = input(u"Enter a Name for this Profile:")
             ip = input(u"Please Insert Desired IP address: ")
             subnetmask = input(u"Please Insert Desired Subnet Mask: ") 
             gateway = input(u"Please Insert Desired Gateway: ")
             DNSServer = input(u'Please Input Desired DNS Server: ')
 
             # prep items for appending
-            appending = [ip,subnetmask,gateway,DNSServer]
+            appending = ["---"+ProfileName+"---",ip,subnetmask,gateway,DNSServer]
 
             ProcessedProfile = " ".join(appending)
             # print(ProcessedProfile)
@@ -172,26 +194,9 @@ def NetTest():
     menu()
    
 
-def confirm():
 
-    Userin = int(input("""Are these settings correct?
-    1) Yes
-    2) No
-    Choose an option: """))
-    try:
-        if Userin == 1:
-            print("Settings confirmed!")
-            menu()
 
-        elif Userin == 2:
-            ip = None
-            subnetmask = None
-            gateway = None
-            DNSServer = None
-            print("Resetting values. Please Try again")
-            Static()
-    except:
-        print("Invalid Entry... Please Try Again!")
+
         
 
 def main():
