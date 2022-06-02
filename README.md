@@ -6,7 +6,10 @@ and also allows network tests to be conducted from any windows device
 --How to use Switch--
 launch program follow prompts, just that easy
 
---Static IP addresses
+--Static IP addresses--
+You can set a static IP address manually using option 1 OR you can save addresses in profiles.csv (or another file of choice) using option 3 and loading a saved IP configuration
+to save a configuration you must select option 3, option 2 and then follow the prompts to configure the profile
+
 ---Network Testing--
 Create a text file with a list of IP Addresses with one address per line;
 x.x.x.x
@@ -14,7 +17,7 @@ y.y.y.y
 z.z.z.z
 
 select option 3
-program will prompt for the name of the text file, do not include the file extension as it is added automatically
+program will prompt for the name of the textx file, do not include the file extension as it is added automatically
 wait for script to complete
 
 --Prereqs--
@@ -32,3 +35,4 @@ pip install wmi
 Windows OS*
 
 *Windows Server is needed for full functionality
+*Test segments have been included for simulated use without a server environment

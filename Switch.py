@@ -1,5 +1,11 @@
-import wmi
 import os
+import csv
+
+# WMI IS REQUIRED FOR THIS PROGRAM TO WORK PROPERLY
+# THIS SECTION CAN BE COMMENTED FOR TESTING ON NON SERVER SYSTEMS
+# import wmi
+
+
 
 
 def menu():
@@ -12,7 +18,8 @@ def menu():
 
     if select == 1:
         select = None
-        StaticInput()
+        info = StaticInput()
+        Static(info[0],info[1],info[2],info[3])
     elif select == 2:
         select = None
         DHCP()
@@ -27,6 +34,9 @@ def menu():
         print("Invalid Entry")
         menu()
 
+
+
+
 def StaticInput():
 
     # Take Static info from user
@@ -34,117 +44,157 @@ def StaticInput():
     subnetmask = input(u"Please Insert Desired Subnet Mask: ") 
     gateway = input(u"Please Insert Desired Gateway: ")
     DNSServer = input(u'Please Input Desired DNS Server: ')
-    Static(ip,subnetmask,gateway,DNSServer)
+    return ip,subnetmask,gateway,DNSServer
+
+
 
 
 def Static(ip,subnetmask,gateway,DNSServer):
-    Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
-    interface = Nics[0]
 
-    # Put static info into place
-    interface.EnableStatic(IPAddress=[ip], SubnetMask=[subnetmask])
-    interface.SetGateways(DefaultIPGateway=[gateway])
-    interface.SetDNSServerSearchOrder([DNSServer])
 
-    # Display of specified IP information
+   
+    # return info
+
+     # Display of specified IP information
     print('\n',"-----NEW INTERFACE CONFIGURATION-----",'\n',"IP ADDRESS = ",ip,'\n',"SUBNETMASK = ",subnetmask,'\n',"DEFAULT GATEWAY = ",gateway,'\n',"DNS SERVER = ",DNSServer)
-    confirm()
+
+    cont = confirm()
+
+    if cont == 1:
+        print("Settings confirmed!")
+            # THIS SECTION IS FOR TESTING PURPOSES ONLY
+     # ADDRESS WILL BE DISPLAYED IN TEXT IF SIMULATED LOADING IS SUCCESSFUL
+    # COMMENT THIS SECTION TO USE
+        Configs = [ip,subnetmask,gateway,DNSServer]
+        # print(Configs)
+        info = " ".join(Configs)
+        print(info)
+
+        # FOR USE UNCOMMENT THIS SECTION 
+        # Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
+        # interface = Nics[0]
+
+        # # Put static info into place
+        # interface.EnableStatic(IPAddress=[ip], SubnetMask=[subnetmask])
+        # interface.SetGateways(DefaultIPGateway=[gateway])
+        # interface.SetDNSServerSearchOrder([DNSServer])
+        menu()
+
+    else:
+        print("Cancelling please try again!")
+        menu()
+
+  
 
 
 def DHCP():
     # Switches between Static and DHCP addressing
 
     # Select interface
-    Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
-    nic = Nics[0]
-    
+    print("ATTEMPTING TO ENABLE DHCP ADDRESSING!")
+    cont = confirm()
+    if cont == 1:
+        Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
+        nic = Nics[0]
+        try:
+            nic.EnableDHCP()
+            print("Successfully changed to DHCP addressing")
+            menu()
+        except:
+            print("ERROR Failed to Switch to DHCP addressing")
+            menu()
+
+    else:
+         print("Cancelling please try again!")
+         menu()
+
     # appempt config change
-    try:
-        nic.EnableDHCP()
-        print("Successfully changed to DHCP addressing")
-        menu()
-    except:
-        print("ERROR Failed to Switch to DHCP addressing")
-        menu()
+   
+
 
 
 def Profile():
-    Profiles = []
-
-    # Choose save or load profile
-    SaveOrLoad = int(input("""Would you like to save or load your configuration
+    print("""Would you like to create a new profile or load an existing profile?
     1) Save
-    2) Load
-    Choose an option: """))
+    2) Load """)
+    select = int(input("Choose an option: "))
+
+    if select == 1:
+        SaveProfile()
+    elif select == 2:
+        LoadProfile()
+    else:
+        print("Invalid input please try again!")
+        Profile()
+
+
+
+
+def SaveProfile():
+    ProfileSaving = str(input("Enter the name of the file you would like to save to: "))
+    profiles = open(ProfileSaving+".csv")
+    ProfileProcessing = csv.writer(profiles)
+
+    inputs = StaticInput()
+    save = [i for i in inputs]
+
+    print(",".join(save),"is now saved as an IP configuration profile.")
+
+    with open(ProfileSaving+".csv",'a',newline='') as writing:
+        write = csv.writer(writing)
+        # write.writerow("\n")
+        write.writerow(save)
+        writing.close()
     
-    # Process User Input
-    if SaveOrLoad == 2:
-        # This section is for loading a configuration
-        # select file to load from
-        # Do not include file extensions
-        ProfileSelect = input("Please specify name of the file containing the profile: ")
-
-        # Attempt profile load
-        try:
-            Profile = open(ProfileSelect+".txt","r")
-            print('\n',"The file ",ProfileSelect," contains the following Profile;")
-
-            # Add items to list for profile display
-            # PROFILES ARE NOT DISPLAYING PROPERLY
-            for i in Profile:
-                print(i)
-                Profiles.append(i)
-            Profile.close()
-            Profiles = [i for item in Profiles for i in item.split()]
-            print(Profiles)
-
-            ip = Profiles[0]
-            subnetmask = Profiles[1]
-            gateway = Profiles[2]
-            DNSServer = Profiles[3]
-
-            Static(ip,subnetmask,gateway,DNSServer)
-
-
-        except:
-            print("This file does not exist Please try again")
-            menu()
-
-    
-    elif SaveOrLoad == 1:
-        #  This Section is for saving a configuration
-        # Save location of new profile
-        # print("""Profile saving syntax: IP SUBNETMASK DEFAULTGATEWAY DNSSERVER
-        # Not following this syntax will result in misconfigured network settings!!! '\n'""")
-        SaveLocation = input("Please specify file to save to: ")
-      
-        try:
-            ip = input(u"Please Insert Desired IP address: ")
-            subnetmask = input(u"Please Insert Desired Subnet Mask: ") 
-            gateway = input(u"Please Insert Desired Gateway: ")
-            DNSServer = input(u'Please Input Desired DNS Server: ')
-
-            # prep items for appending
-            appending = [ip,subnetmask,gateway,DNSServer]
-
-            ProcessedProfile = " ".join(appending)
-            # print(ProcessedProfile)
-
-            file = open(SaveLocation+".txt","a")
-            file.write(ProcessedProfile)
-            file.close()
-
-        except:
-            # Error checking invalid or incomplete inputs from user
-            print("ERROR: please try again!")
-            ip = None
-            subnetmask = None
-            gateway = None
-            DNSServer = None
-            menu()
-          
-
     menu()
+
+
+
+
+def LoadProfile():
+    
+    # Load CSV for processing
+    ProfileStorage = str(input("Enter the name of the file you would like to load from: "))
+    profiles = open(ProfileStorage+".csv")
+    ProfileProcessing = csv.reader(profiles)
+
+    # list comprehension, adds every item to the CSV file to the contents
+    Contents = [row for row in ProfileProcessing]
+
+    # Takes input from the while loop, this is what the user would 
+    Processed = []
+
+    x = 0 
+    y = 0
+    # loop through contents, print from processed inputs
+    while y in range(len(Contents)):
+        FormattedIndex = ", ".join(Contents[y])
+    
+        # Filter out repeat entries, add it first then add it to processed list,
+        # This means that if there is a duplicate profile it will only pass the if statement on the first pass
+        if Contents[y] not in Processed:
+            print("Profile",x+1,"-",FormattedIndex)
+            Processed.append(Contents[y])
+            x += 1
+
+        y += 1
+    
+
+    # print(Contents)
+    # print('\n',"Input is single interger value")
+    SelectedList = int(input("Please enter the profile you would like to load: ")) - 1
+
+    # print(Processed[SelectedList][0])
+    ip = Processed[SelectedList][0]
+    subnetmask = Processed[SelectedList][1]
+    gateway = Processed[SelectedList][2]
+    DNSServer = Processed[SelectedList][3]
+
+    information = Static(ip, subnetmask, gateway, DNSServer)
+    print(information)
+    menu()
+
+
 
 
 def NetTest():
@@ -163,36 +213,30 @@ def NetTest():
 
     # Send Pings to specified hosts
     for i in TestCases:
-        send = os.system("ping "+ i +" >/dev/null 2>&1")
+        send = os.system("ping "+ i)
 
-        if send == 0:
-            print(i ,"is alive")
-        else:
-            print(i ,"is dead")
+        # if send == 0:
+        #     print(i ,"is alive")
+        # else:
+        #     print(i ,"is dead")
     menu()
    
 
+
+
 def confirm():
-
-    Userin = int(input("""Are these settings correct?
-    1) Yes
-    2) No
-    Choose an option: """))
     try:
-        if Userin == 1:
-            print("Settings confirmed!")
-            menu()
-
-        elif Userin == 2:
-            ip = None
-            subnetmask = None
-            gateway = None
-            DNSServer = None
-            print("Resetting values. Please Try again")
-            Static()
+        Userin = int(input("""Are these settings correct?
+        1) Yes
+        2) No
+        Choose an option: """))
+        return Userin
     except:
-        print("Invalid Entry... Please Try Again!")
-        
+        print("Invalid input please try again!")
+        menu()
+
+    
+
 
 def main():
     menu()
