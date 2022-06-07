@@ -1,5 +1,6 @@
 import os
 import csv
+import datetime
 
 # WMI IS REQUIRED FOR THIS PROGRAM TO WORK PROPERLY
 # THIS SECTION CAN BE COMMENTED FOR TESTING ON NON SERVER SYSTEMS
@@ -13,7 +14,9 @@ def menu():
     1) Set Static IP menu
     2) Set DHCP Address
     3) Configuration Profiles menu
-    4) Test Network Connectivity""")
+    4) Test Network Connectivity
+    5) Quit""")
+
     select = int(input("Choose an option: "))
 
     if select == 1:
@@ -29,6 +32,8 @@ def menu():
     elif select == 4:
         select = None
         NetTest()
+    elif select == 5:
+        quit()
     else:
         select = None
         print("Invalid Entry")
@@ -50,11 +55,6 @@ def StaticInput():
 
 
 def Static(ip,subnetmask,gateway,DNSServer):
-
-
-   
-    # return info
-
      # Display of specified IP information
     print('\n',"-----NEW INTERFACE CONFIGURATION-----",'\n',"IP ADDRESS = ",ip,'\n',"SUBNETMASK = ",subnetmask,'\n',"DEFAULT GATEWAY = ",gateway,'\n',"DNS SERVER = ",DNSServer)
 
@@ -62,13 +62,13 @@ def Static(ip,subnetmask,gateway,DNSServer):
 
     if cont == 1:
         print("Settings confirmed!")
-            # THIS SECTION IS FOR TESTING PURPOSES ONLY
-     # ADDRESS WILL BE DISPLAYED IN TEXT IF SIMULATED LOADING IS SUCCESSFUL
-    # COMMENT THIS SECTION TO USE
+
+        # THIS SECTION IS FOR TESTING PURPOSES ONLY
+        # ADDRESS WILL BE DISPLAYED IN TEXT IF SIMULATED LOADING IS SUCCESSFUL
+        #COMMENT THIS SECTION TO USE
         Configs = [ip,subnetmask,gateway,DNSServer]
-        # print(Configs)
-        info = " ".join(Configs)
-        print(info)
+        IpInfo = " ".join(Configs)
+        print(IpInfo)
 
         # FOR USE UNCOMMENT THIS SECTION 
         # Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
@@ -94,8 +94,13 @@ def DHCP():
     print("ATTEMPTING TO ENABLE DHCP ADDRESSING!")
     cont = confirm()
     if cont == 1:
-        Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
-        nic = Nics[0]
+        try:
+            Nics = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled=True)
+            nic = Nics[0]
+            menu()
+        except:
+            print("Error Encountered Please Try again")
+            menu()
         try:
             nic.EnableDHCP()
             print("Successfully changed to DHCP addressing")
@@ -142,7 +147,6 @@ def SaveProfile():
 
     with open(ProfileSaving+".csv",'a',newline='') as writing:
         write = csv.writer(writing)
-        # write.writerow("\n")
         write.writerow(save)
         writing.close()
     
@@ -180,11 +184,9 @@ def LoadProfile():
         y += 1
     
 
-    # print(Contents)
-    # print('\n',"Input is single interger value")
+    # Select File to save to and saving mechanism
     SelectedList = int(input("Please enter the profile you would like to load: ")) - 1
 
-    # print(Processed[SelectedList][0])
     ip = Processed[SelectedList][0]
     subnetmask = Processed[SelectedList][1]
     gateway = Processed[SelectedList][2]
@@ -199,7 +201,6 @@ def LoadProfile():
 
 def NetTest():
     TestCases = []
-    Results = []
 
     # This is the list of addresses to test
     testlist = input("Please specify the name of the address file: ")
@@ -211,20 +212,32 @@ def NetTest():
         TestCases.append(i)
     IpList.close()
 
+    IpResults = []
+
     # Send Pings to specified hosts
     for i in TestCases:
         send = os.system("ping "+ i)
 
-        # if send == 0:
-        #     print(i ,"is alive")
-        # else:
-        #     print(i ,"is dead")
+        i = i.replace('\n','')
+        if send == 0:
+            IpResults.append(i+" is alive")
+        elif send != 0:
+            IpResults.append(i+" is dead")
+        
+
+    NetResults = open("NetTestResults.txt","a")
+    Log = ", ".join(IpResults)
+    LogTime = datetime.datetime.now()
+    NetResults.write('\n'+(str(LogTime.strftime("%Y-%m-%d %H:%M:%S")))+'\n'+str(Log)+'\n')
+    NetResults.close()
+
     menu()
-   
+
 
 
 
 def confirm():
+    # Takes user input for confirming settings
     try:
         Userin = int(input("""Are these settings correct?
         1) Yes
