@@ -228,7 +228,8 @@ def NetTest():
     NetResults = open("NetTestResults.txt","a")
     Log = ", ".join(IpResults)
     LogTime = datetime.datetime.now()
-    NetResults.write('\n'+(str(LogTime.strftime("%Y-%m-%d %H:%M:%S")))+'\n'+str(Log)+'\n')
+    NetResults.write((str(LogTime.strftime("%Y-%m-%d %H:%M:%S")))+'\n'+str(Log))
+    NetResults.write('\n')
     NetResults.close()
 
     menu()
